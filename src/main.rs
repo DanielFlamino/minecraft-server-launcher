@@ -178,7 +178,8 @@ fn main() {
                                     scheduled_time,
                                 );
                                 one_minute_reminder_sent = true;
-                            } else if !five_minutes_reminder_sent
+                            } else if !one_minute_reminder_sent
+                                && !five_minutes_reminder_sent
                                 && (scheduled_time - now) < Duration::minutes(5)
                             {
                                 // Five minutes to go
@@ -190,7 +191,9 @@ fn main() {
                                     scheduled_time,
                                 );
                                 five_minutes_reminder_sent = true;
-                            } else if !fifteen_minutes_reminder_sent
+                            } else if !one_minute_reminder_sent
+                                && !five_minutes_reminder_sent
+                                && !fifteen_minutes_reminder_sent
                                 && (scheduled_time - now) < Duration::minutes(15)
                             {
                                 // Fifteen minutes to go
@@ -202,7 +205,10 @@ fn main() {
                                     scheduled_time,
                                 );
                                 fifteen_minutes_reminder_sent = true;
-                            } else if !thirty_minutes_reminder_sent
+                            } else if !one_minute_reminder_sent
+                                && !five_minutes_reminder_sent
+                                && !fifteen_minutes_reminder_sent
+                                && !thirty_minutes_reminder_sent
                                 && (scheduled_time - now) < Duration::minutes(30)
                             {
                                 // Thirty minutes to go
@@ -214,7 +220,11 @@ fn main() {
                                     scheduled_time,
                                 );
                                 thirty_minutes_reminder_sent = true;
-                            } else if !one_hour_reminder_sent
+                            } else if !one_minute_reminder_sent
+                                && !five_minutes_reminder_sent
+                                && !fifteen_minutes_reminder_sent
+                                && !thirty_minutes_reminder_sent
+                                && !one_hour_reminder_sent
                                 && (scheduled_time - now) < Duration::hours(1)
                             {
                                 // One hour to go
