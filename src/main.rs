@@ -1,5 +1,6 @@
-use chrono::prelude::*;
+use chrono::prelude::{DateTime, Local, Timelike};
 use chrono::Duration;
+use regex::Regex;
 use std::fs::{self, File};
 use std::io::{self, stdout, ErrorKind, Read, Write};
 use std::path::Path;
@@ -91,6 +92,53 @@ fn main() {
         break;
     }
     println!("[INFO] Shutdown scheduled for {}", scheduled_time);
+
+    // Update motd
+    let server_properties_path = Path::new("./server.properties");
+    let server_properties_temporary_path = Path::new("./server.properties.tmp");
+    let contents = match File::open(&server_properties_path) {
+        Ok(mut file) => {
+            // Opened server.properties
+            let mut contents = String::new();
+            match file.read_to_string(&mut contents) {
+                Ok(_) => {
+                    // Replace motd text
+                    let regex = Regex::new("motd=(.)*").unwrap();
+                    let motd = format!("motd=\\u00a73Um abrigo em tempos de pandemia...\\u00a7r\\n\\u00a76Shutdown at {}", scheduled_time);
+                    contents = regex.replace_all(&contents, &motd[..]).to_string();
+                }
+                Err(error) => println!(
+                    "[ERROR] Failed to read server.properties contents: '{}",
+                    error
+                ),
+            }
+            contents
+        }
+        Err(error) => {
+            panic!("[ERROR] Failed to open server.properties: {}", error);
+        }
+    };
+
+    // Create temporary server.properties file
+    let mut file = match File::create(&server_properties_temporary_path) {
+        Ok(file) => file,
+        Err(error) => panic!("Failed to create server.properties.tmp file: {}", error),
+    };
+
+    // Write updated content to temporary server.properties file
+    match file.write_all(contents.as_bytes()) {
+        Ok(_) => match fs::rename(server_properties_temporary_path, server_properties_path) {
+            Ok(()) => println!("[INFO] Server motd updated"),
+            Err(error) => println!(
+                "[ERROR] Failed to replace server.properties with server.properties.tmp: {}",
+                error
+            ),
+        },
+        Err(error) => println!(
+            "[ERROR] Couldn't write to server.properties.tmp file: {}",
+            error
+        ),
+    }
 
     // Check for server lock
     let server_lock_path = Path::new("./server.lock");
